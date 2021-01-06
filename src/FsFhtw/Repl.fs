@@ -8,14 +8,11 @@ type Message =
     | HelpRequested
     | NotParsable of string
 
-type State = Domain.State
+type State = Domain.GameState * Domain.ActionResult
 
 let read (input : string) =
     match input with
-    | Increment -> Domain.Increment |> DomainMessage
-    | Decrement -> Domain.Decrement |> DomainMessage
-    | IncrementBy v -> Domain.IncrementBy v |> DomainMessage
-    | DecrementBy v -> Domain.DecrementBy v |> DomainMessage
+    | PokemonAction -> Domain.PokemonAction (Int32.Parse input) |> DomainMessage
     | Help -> HelpRequested
     | ParseFailed  -> NotParsable input
 
@@ -31,7 +28,7 @@ let evaluate (update : Domain.Message -> State -> State) (state : State) (msg : 
     match msg with
     | DomainMessage msg ->
         let newState = update msg state
-        let message = sprintf "The message was %A. New state is %A" msg newState
+        let message = "" // sprintf "The message was %A. New state is %A" msg newState
         (newState, message)
     | HelpRequested ->
         let message = createHelpText ()
