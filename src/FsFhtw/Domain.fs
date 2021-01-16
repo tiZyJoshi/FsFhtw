@@ -22,13 +22,6 @@ type ActionResult =
     | Player2ToMove
     | GameWon of Player
 
-type NewGame<'GameState> =
-    'GameState * ActionResult
-type Player1Actions<'GameState> =
-    'GameState -> PokemonAction -> 'GameState * ActionResult
-type Player2Actions<'GameState> =
-    'GameState -> PokemonAction -> 'GameState * ActionResult
-
 type GameState = {
     player1Pokemon : Pokemon
     player2Pokemon : Pokemon
@@ -61,37 +54,54 @@ let printPlayerActions gameState player =
         printPokemonActions gameState.player2Pokemon.actions 0
 
 let player1Moved gameState action =
-    let newGameState = {
-        player1Pokemon = gameState.player1Pokemon
-        player2Pokemon = {
-            name = gameState.player2Pokemon.name
-            hp = gameState.player2Pokemon.hp - gameState.player1Pokemon.actions.[action].damage
-            actions = gameState.player2Pokemon.actions
-        }}
+    try
+        //check if action exists
+        match gameState.player1Pokemon.actions.[action] with
+        | _ -> 
+            let newGameState = {
+                    player1Pokemon = gameState.player1Pokemon
+                    player2Pokemon = {
+                    name = gameState.player2Pokemon.name
+                    hp = gameState.player2Pokemon.hp - gameState.player1Pokemon.actions.[action].damage
+                    actions = gameState.player2Pokemon.actions
+            }}
 
-    printPlayerActions newGameState Player2
+            if newGameState |> isGameWonBy Player1 then
+                printfn "GAME WON by %A" Player1
+                newGameState, GameWon Player1
+            else
+                printPlayerActions newGameState Player2
+                newGameState, Player2ToMove
+    with
+    | e -> printfn "Not a valid action."
+           printPlayerActions gameState Player1
+           gameState, Player1ToMove
 
-    if newGameState |> isGameWonBy Player1 then
-        newGameState, GameWon Player1
-    else 
-        newGameState, Player2ToMove
 
 let player2Moved gameState action =
-    let newGameState = {
-        player1Pokemon = {
-            name = gameState.player1Pokemon.name
-            hp = gameState.player1Pokemon.hp - gameState.player2Pokemon.actions.[action].damage
-            actions = gameState.player1Pokemon.actions
-        }
-        player2Pokemon = gameState.player2Pokemon
-    }
+    try
+        //check if action exists
+        match gameState.player1Pokemon.actions.[action] with
+        | _ -> 
+            let newGameState = {
+                player1Pokemon = {
+                    name = gameState.player1Pokemon.name
+                    hp = gameState.player1Pokemon.hp - gameState.player2Pokemon.actions.[action].damage
+                    actions = gameState.player1Pokemon.actions
+                }
+                player2Pokemon = gameState.player2Pokemon
+            }
 
-    printPlayerActions newGameState Player1
-
-    if newGameState |> isGameWonBy Player2 then
-        newGameState, GameWon Player2
-    else 
-        newGameState, Player1ToMove
+            if newGameState |> isGameWonBy Player2 then
+                printfn "GAME WON by %A" Player2
+                newGameState, GameWon Player2
+            else 
+                printPlayerActions newGameState Player1
+                newGameState, Player1ToMove
+    with
+    | e -> printfn "Not a valid action."
+           printPlayerActions gameState Player2
+           gameState, Player2ToMove
 
 let init () = 
     let gameState = {
@@ -102,6 +112,10 @@ let init () =
                 {
                 name = "Tackle"
                 damage = 10
+                }
+                {
+                name = "Thunder Wave"
+                damage = 30
                 }
                 {
                 name = "Thunderbolt"
@@ -138,5 +152,4 @@ let update (msg : Message) model =
         //printPlayerActions gameState Player2
         player2Moved gameState action
     | GameWon player ->
-        printfn "GAME WON by %A" player
         gameState, GameWon player
