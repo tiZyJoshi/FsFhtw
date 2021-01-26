@@ -6,7 +6,7 @@ open FsCheck
 [<Fact>]
 let ``That the laws of reality still apply`` () =
     Assert.True(1 = 1)
-
+    
 //[<Fact>]
 //let ``That incrementing twice on an initialized counter yields 2`` () =
 //    let initialState = Domain.init ()

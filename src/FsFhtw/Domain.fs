@@ -18,16 +18,9 @@ type Pokemon = {
 }
 
 type ActionResult =
-    | Player1ToMove
+    Player1ToMove
     | Player2ToMove
     | GameWon of Player
-
-type NewGame<'GameState> =
-    'GameState * ActionResult
-type Player1Actions<'GameState> =
-    'GameState -> PokemonAction -> 'GameState * ActionResult
-type Player2Actions<'GameState> =
-    'GameState -> PokemonAction -> 'GameState * ActionResult
 
 type GameState = {
     player1Pokemon : Pokemon
@@ -100,11 +93,11 @@ let init () =
             hp = 100
             actions = [
                 {
-                name = "Tackle"
+                name = "Hauihaui"
                 damage = 10
                 }
                 {
-                name = "Thunderbolt"
+                name = "Blitziblitzi"
                 damage = 70
                 }
             ]
@@ -114,8 +107,8 @@ let init () =
             hp = 100
             actions = [
                 {
-                name = "Tackle"
-                damage = 10
+                name = "Kratzikratzi"
+                damage = 25
                 }
             ]
         }
